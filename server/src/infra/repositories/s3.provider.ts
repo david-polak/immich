@@ -1,5 +1,5 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
-import { Client, UploadedObjectInfo } from 'minio';
+import {BucketItem, BucketStream, Client, UploadedObjectInfo} from 'minio';
 import { Readable } from "stream";
 
 const S3_BUCKET = process.env.S3_BUCKET || "";
@@ -58,8 +58,23 @@ export class S3Provider implements IStorageRepository {
     return Promise.resolve(undefined);
   }
 
-  readdir(folder: string): Promise<string[]> {
-    return Promise.resolve([]);
+  async readdir(folder: string): Promise<string[]> {
+    const prefix = folder.endsWith("/") ? folder : `${folder}/`;
+    return new Promise<string[]>((resolve, reject) => {
+      const data: string[] = [];
+      const stream: BucketStream<BucketItem> = this.client.listObjectsV2(this.bucket, prefix, false);
+      stream.on('error', reject);
+      stream.on('end', () => resolve(data));
+      stream.on('data', item => {
+        if (item.name) {
+          // files have names
+          data.push(item.name)
+        } else if (item.prefix) {
+          // directories don't have names, only prefixes
+          data.push(item.prefix)
+        }
+      })
+    })
   }
 
   removeEmptyDirs(folder: string): Promise<void> {
