@@ -55,6 +55,7 @@ import {
   UserRepository,
   UserTokenRepository,
 } from './repositories';
+import {S3Provider} from "@app/infra/repositories/s3.provider";
 
 const providers: Provider[] = [
   { provide: IAccessRepository, useClass: AccessRepository },
@@ -73,7 +74,7 @@ const providers: Provider[] = [
   { provide: ISearchRepository, useClass: TypesenseRepository },
   { provide: ISharedLinkRepository, useClass: SharedLinkRepository },
   { provide: ISmartInfoRepository, useClass: SmartInfoRepository },
-  { provide: IStorageRepository, useClass: FilesystemProvider },
+  { provide: IStorageRepository, useClass: S3Provider },
   { provide: ISystemConfigRepository, useClass: SystemConfigRepository },
   { provide: ITagRepository, useClass: TagRepository },
   { provide: IMediaRepository, useClass: MediaRepository },
