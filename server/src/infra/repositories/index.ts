@@ -13,6 +13,7 @@ export * from './machine-learning.repository';
 export * from './media.repository';
 export * from './partner.repository';
 export * from './person.repository';
+export * from './s3.provider';
 export * from './shared-link.repository';
 export * from './smart-info.repository';
 export * from './system-config.repository';

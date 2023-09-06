@@ -47,6 +47,7 @@ import {
   MediaRepository,
   PartnerRepository,
   PersonRepository,
+  S3Provider,
   SharedLinkRepository,
   SmartInfoRepository,
   SystemConfigRepository,
@@ -55,7 +56,6 @@ import {
   UserRepository,
   UserTokenRepository,
 } from './repositories';
-import {S3Provider} from "@app/infra/repositories/s3.provider";
 
 const providers: Provider[] = [
   { provide: IAccessRepository, useClass: AccessRepository },
