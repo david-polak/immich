@@ -50,15 +50,8 @@ export class S3Provider implements IStorageRepository {
     };
   }
 
-  mkdir(filepath: string): Promise<void> {
-    return Promise.resolve();
-
-    // this.client.putObject(this.bucket, filepath, "", 0).then(
-    //   (res: UploadedObjectInfo) => console.log("success", res)
-    // ).catch(
-    //   (err) => console.log("fail", err)
-    // );
-
+  async mkdir(filepath: string): Promise<void> {
+    await this.client.putObject(this.bucket, filepath, "", 0)
   }
 
   moveFile(source: string, target: string): Promise<void> {
