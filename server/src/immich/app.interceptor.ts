@@ -8,6 +8,7 @@ import { NextFunction, RequestHandler } from 'express';
 import multer, { StorageEngine, diskStorage } from 'multer';
 import { Observable } from 'rxjs';
 import { AuthRequest } from './app.guard';
+import {result} from "lodash";
 
 export enum Route {
   ASSET = 'asset',
@@ -113,7 +114,9 @@ export class FileUploadInterceptor implements NestInterceptor {
   }
 
   private destination(req: AuthRequest, file: Express.Multer.File, callback: DiskStorageCallback) {
-    return callbackify(() => this.assetService.getUploadFolder(asRequest(req, file)), callback as Callback<string>);
+    this.assetService.getUploadFolder(asRequest(req, file))
+      .then(result => callback(null, result))
+      .catch(error => callback(error, ''))
   }
 
   private handleFile(req: AuthRequest, file: Express.Multer.File, callback: Callback<Partial<ImmichFile>>) {

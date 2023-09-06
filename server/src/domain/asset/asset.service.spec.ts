@@ -228,22 +228,22 @@ describe(AssetService.name, () => {
   });
 
   describe('getUploadFolder', () => {
-    it('should require authentication', () => {
-      expect(() => sut.getUploadFolder(uploadFile.nullAuth)).toThrowError(UnauthorizedException);
+    it('should require authentication', async () => {
+      await expect(sut.getUploadFolder(uploadFile.nullAuth)).rejects.toThrowError(UnauthorizedException);
     });
 
-    it('should return profile for profile uploads', () => {
-      expect(sut.getUploadFolder(uploadFile.filename(UploadFieldName.PROFILE_DATA, 'image.jpg'))).toEqual(
+    it('should return profile for profile uploads', async () => {
+      expect(await sut.getUploadFolder(uploadFile.filename(UploadFieldName.PROFILE_DATA, 'image.jpg'))).toEqual(
         'upload/profile/admin_id',
       );
-      expect(storageMock.mkdirSync).toHaveBeenCalledWith('upload/profile/admin_id');
+      expect(storageMock.mkdir).toHaveBeenCalledWith('upload/profile/admin_id');
     });
 
-    it('should return upload for everything else', () => {
-      expect(sut.getUploadFolder(uploadFile.filename(UploadFieldName.ASSET_DATA, 'image.jpg'))).toEqual(
+    it('should return upload for everything else', async () => {
+      expect(await sut.getUploadFolder(uploadFile.filename(UploadFieldName.ASSET_DATA, 'image.jpg'))).toEqual(
         'upload/upload/admin_id',
       );
-      expect(storageMock.mkdirSync).toHaveBeenCalledWith('upload/upload/admin_id');
+      expect(storageMock.mkdir).toHaveBeenCalledWith('upload/upload/admin_id');
     });
   });
 

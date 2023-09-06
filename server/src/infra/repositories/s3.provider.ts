@@ -1,5 +1,5 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
-import { Client, UploadedObjectInfojk} from 'minio';
+import { Client, UploadedObjectInfo } from 'minio';
 import { Readable } from "stream";
 
 const S3_BUCKET = process.env.S3_BUCKET || "";
@@ -50,12 +50,15 @@ export class S3Provider implements IStorageRepository {
     };
   }
 
-  mkdirSync(filepath: string): void {
-    this.client.putObject(this.bucket, filepath, "", 0).then(
-      (res: UploadedObjectInfo) => console.log("success", res)
-    ).catch(
-      (err) => console.log("fail", err)
-    );
+  mkdir(filepath: string): Promise<void> {
+    return Promise.resolve();
+
+    // this.client.putObject(this.bucket, filepath, "", 0).then(
+    //   (res: UploadedObjectInfo) => console.log("success", res)
+    // ).catch(
+    //   (err) => console.log("fail", err)
+    // );
+
   }
 
   moveFile(source: string, target: string): Promise<void> {

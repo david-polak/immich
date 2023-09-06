@@ -261,7 +261,7 @@ export class MetadataExtractionProcessor {
 
       // Write out extracted video, and add it to the asset repository.
       const encodedVideoFolder = this.storageCore.getFolderLocation(StorageFolder.ENCODED_VIDEO, asset.ownerId);
-      this.storageRepository.mkdirSync(encodedVideoFolder);
+      await this.storageRepository.mkdir(encodedVideoFolder);
       const livePhotoPath = path.join(encodedVideoFolder, path.parse(asset.originalPath).name + '.mp4');
       await fs.promises.writeFile(livePhotoPath, extracted.buffer);
 

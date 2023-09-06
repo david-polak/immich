@@ -9,7 +9,7 @@ export const newStorageRepositoryMock = (): jest.Mocked<IStorageRepository> => {
     removeEmptyDirs: jest.fn(),
     moveFile: jest.fn(),
     checkFileExists: jest.fn(),
-    mkdirSync: jest.fn(),
+    mkdir: jest.fn(),
     checkDiskUsage: jest.fn(),
     readdir: jest.fn(),
   };

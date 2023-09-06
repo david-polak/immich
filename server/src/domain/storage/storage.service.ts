@@ -10,9 +10,9 @@ export class StorageService {
 
   constructor(@Inject(IStorageRepository) private storageRepository: IStorageRepository) {}
 
-  init() {
+  async init() {
     const libraryBase = this.storageCore.getBaseFolder(StorageFolder.LIBRARY);
-    this.storageRepository.mkdirSync(libraryBase);
+    await this.storageRepository.mkdir(libraryBase);
   }
 
   async handleDeleteFiles(job: IDeleteFilesJob) {

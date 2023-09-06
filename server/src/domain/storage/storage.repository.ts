@@ -27,7 +27,7 @@ export interface IStorageRepository {
   removeEmptyDirs(folder: string): Promise<void>;
   moveFile(source: string, target: string): Promise<void>;
   checkFileExists(filepath: string, mode?: number): Promise<boolean>;
-  mkdirSync(filepath: string): void;
+  mkdir(filepath: string): Promise<void>;
   checkDiskUsage(folder: string): Promise<DiskUsage>;
   readdir(folder: string): Promise<string[]>;
 }

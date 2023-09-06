@@ -131,7 +131,7 @@ describe(MediaService.name, () => {
       assetMock.getByIds.mockResolvedValue([assetStub.image]);
       await sut.handleGenerateJpegThumbnail({ id: assetStub.image.id });
 
-      expect(storageMock.mkdirSync).toHaveBeenCalledWith('upload/thumbs/user-id');
+      expect(storageMock.mkdir).toHaveBeenCalledWith('upload/thumbs/user-id');
       expect(mediaMock.resize).toHaveBeenCalledWith('/original/path.jpg', 'upload/thumbs/user-id/asset-id.jpeg', {
         size: 1440,
         format: 'jpeg',
@@ -149,7 +149,7 @@ describe(MediaService.name, () => {
       assetMock.getByIds.mockResolvedValue([assetStub.video]);
       await sut.handleGenerateJpegThumbnail({ id: assetStub.video.id });
 
-      expect(storageMock.mkdirSync).toHaveBeenCalledWith('upload/thumbs/user-id');
+      expect(storageMock.mkdir).toHaveBeenCalledWith('upload/thumbs/user-id');
       expect(mediaMock.transcode).toHaveBeenCalledWith('/original/path.ext', 'upload/thumbs/user-id/asset-id.jpeg', {
         inputOptions: ['-ss 00:00:00', '-sws_flags accurate_rnd+bitexact+full_chroma_int'],
         outputOptions: [
@@ -170,7 +170,7 @@ describe(MediaService.name, () => {
       assetMock.getByIds.mockResolvedValue([assetStub.video]);
       await sut.handleGenerateJpegThumbnail({ id: assetStub.video.id });
 
-      expect(storageMock.mkdirSync).toHaveBeenCalledWith('upload/thumbs/user-id');
+      expect(storageMock.mkdir).toHaveBeenCalledWith('upload/thumbs/user-id');
       expect(mediaMock.transcode).toHaveBeenCalledWith('/original/path.ext', 'upload/thumbs/user-id/asset-id.jpeg', {
         inputOptions: ['-ss 00:00:00', '-sws_flags accurate_rnd+bitexact+full_chroma_int'],
         outputOptions: [
@@ -300,7 +300,7 @@ describe(MediaService.name, () => {
 
       expect(mediaMock.probe).toHaveBeenCalledWith('/original/path.ext');
       expect(configMock.load).toHaveBeenCalled();
-      expect(storageMock.mkdirSync).toHaveBeenCalled();
+      expect(storageMock.mkdir).toHaveBeenCalled();
       expect(mediaMock.transcode).toHaveBeenCalledWith(
         '/original/path.ext',
         'upload/encoded-video/user-id/asset-id.mp4',

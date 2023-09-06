@@ -18,7 +18,7 @@ describe(StorageService.name, () => {
   describe('init', () => {
     it('should create the library folder on initialization', () => {
       sut.init();
-      expect(storageMock.mkdirSync).toHaveBeenCalledWith('upload/library');
+      expect(storageMock.mkdir).toHaveBeenCalledWith('upload/library');
     });
   });
 

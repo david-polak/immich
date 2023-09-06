@@ -119,7 +119,7 @@ export class AssetService {
     return sanitize(`${this.cryptoRepository.randomUUID()}${lookup[fieldName]}`);
   }
 
-  getUploadFolder({ authUser, fieldName }: UploadRequest): string {
+  async getUploadFolder({ authUser, fieldName }: UploadRequest): Promise<string> {
     authUser = this.access.requireUploadAccess(authUser);
 
     let folder = this.storageCore.getFolderLocation(StorageFolder.UPLOAD, authUser.id);
@@ -127,7 +127,7 @@ export class AssetService {
       folder = this.storageCore.getFolderLocation(StorageFolder.PROFILE, authUser.id);
     }
 
-    this.storageRepository.mkdirSync(folder);
+    await this.storageRepository.mkdir(folder);
 
     return folder;
   }

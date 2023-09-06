@@ -157,7 +157,7 @@ export class MediaService {
     const input = asset.originalPath;
     const outputFolder = this.storageCore.getFolderLocation(StorageFolder.ENCODED_VIDEO, asset.ownerId);
     const output = join(outputFolder, `${asset.id}.mp4`);
-    this.storageRepository.mkdirSync(outputFolder);
+    await this.storageRepository.mkdir(outputFolder);
 
     const { videoStreams, audioStreams, format } = await this.mediaRepository.probe(input);
     const mainVideoStream = this.getMainStream(videoStreams);
@@ -302,7 +302,7 @@ export class MediaService {
 
   ensureThumbnailPath(asset: AssetEntity, extension: string): string {
     const folderPath = this.storageCore.getFolderLocation(StorageFolder.THUMBNAILS, asset.ownerId);
-    this.storageRepository.mkdirSync(folderPath);
+    this.storageRepository.mkdir(folderPath);
     return join(folderPath, `${asset.id}.${extension}`);
   }
 }

@@ -134,7 +134,7 @@ export class FacialRecognitionService {
 
     const outputFolder = this.storageCore.getFolderLocation(StorageFolder.THUMBNAILS, asset.ownerId);
     const output = join(outputFolder, `${personId}.jpeg`);
-    this.storageRepository.mkdirSync(outputFolder);
+    await this.storageRepository.mkdir(outputFolder);
 
     const { x1, y1, x2, y2 } = boundingBox;
 

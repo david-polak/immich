@@ -78,10 +78,11 @@ export class FilesystemProvider implements IStorageRepository {
     }
   }
 
-  mkdirSync(filepath: string): void {
+  async mkdir(filepath: string): Promise<void> {
     if (!existsSync(filepath)) {
       mkdirSync(filepath, { recursive: true });
     }
+    return Promise.resolve()
   }
 
   async checkDiskUsage(folder: string): Promise<DiskUsage> {
