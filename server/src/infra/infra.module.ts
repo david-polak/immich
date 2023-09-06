@@ -74,7 +74,7 @@ const providers: Provider[] = [
   { provide: ISearchRepository, useClass: TypesenseRepository },
   { provide: ISharedLinkRepository, useClass: SharedLinkRepository },
   { provide: ISmartInfoRepository, useClass: SmartInfoRepository },
-  { provide: IStorageRepository, useClass: S3Provider },
+  { provide: IStorageRepository, useClass: FilesystemProvider },
   { provide: ISystemConfigRepository, useClass: SystemConfigRepository },
   { provide: ITagRepository, useClass: TagRepository },
   { provide: IMediaRepository, useClass: MediaRepository },
