@@ -1,6 +1,7 @@
 import { IStorageRepository } from '@app/domain';
 import { S3Provider } from '@app/infra/repositories/s3.provider';
-import { Client, UploadedObjectInfo } from 'minio';
+import { uuidStub } from '@test';
+import { BucketItem, BucketStream, Client, UploadedObjectInfo } from 'minio';
 
 class S3ProviderMock extends S3Provider implements IStorageRepository {
   setRemote(client: Client, bucket: string) {
@@ -55,7 +56,6 @@ describe(S3Provider.name, () => {
   describe(provider.unlinkDir.name, () => {
     it('removes an empty directory', async () => {
       await provider.unlinkDir('test/notempty/');
-      console.log('here');
     });
   });
 });
@@ -78,10 +78,26 @@ describe(`${S3Provider.name} functional tests`, () => {
   const provider: S3ProviderMock = new S3ProviderMock();
   provider.setRemote(client, S3_BUCKET);
 
-  describe(provider.mkdir.name, () => {
-    it('creates a directory', () => {});
+  const base = new Date(Date.now()).toISOString();
 
-    it('creates a directory 2', async () => {});
+  beforeAll(async () => {
+    // create a base test directory
+    await client.putObject(S3_BUCKET, `${base}/`, '', 0);
+  });
+
+  afterAll(async () => {
+    // remove all objects form the base test directory
+    const objects: string[] = [];
+    await new Promise<string[]>((resolve, reject) => {
+      const stream = client.listObjectsV2(S3_BUCKET, `${base}/`, true);
+      stream.on('data', (item) => item.name && objects.push(item.name));
+      stream.on('end', () => client.removeObjects(S3_BUCKET, objects));
+      stream.on('error', reject);
+    });
+  });
+
+  describe(provider.mkdir.name, () => {
+    it('creates a directory', async () => {});
   });
 
   describe(provider.readdir.name, () => {

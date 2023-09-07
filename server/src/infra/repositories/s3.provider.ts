@@ -53,7 +53,8 @@ export class S3Provider implements IStorageRepository {
   }
 
   async mkdir(filepath: string): Promise<void> {
-    await this.client.putObject(this.bucket, filepath, '', 0);
+    const objectName = filepath.endsWith('/') ? filepath : `${filepath}/`;
+    await this.client.putObject(this.bucket, objectName, '', 0);
   }
 
   async moveFile(source: string, target: string): Promise<void> {
