@@ -82,7 +82,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   unlink(filepath: string): Promise<void> {
-    return Promise.resolve(undefined);
+    return this.client.removeObjects(this.bucket, [filepath])
   }
 
   unlinkDir(folder: string, options?: { recursive?: boolean; force?: boolean }): Promise<void> {

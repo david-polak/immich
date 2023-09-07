@@ -41,5 +41,11 @@ describe(S3Provider.name, () => {
     })
   })
 
+  describe(provider.unlink.name, () => {
+    it('removes a single file', async () => {
+      await provider.unlink("create/setup")
+    })
+  })
+
 
 })
