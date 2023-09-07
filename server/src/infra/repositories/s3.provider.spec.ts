@@ -2,6 +2,7 @@ import { IStorageRepository } from '@app/domain';
 import { S3Provider } from '@app/infra/repositories/s3.provider';
 import { uuidStub } from '@test';
 import { BucketItem, BucketStream, Client, UploadedObjectInfo } from 'minio';
+import { v4 } from 'uuid';
 
 class S3ProviderMock extends S3Provider implements IStorageRepository {
   setRemote(client: Client, bucket: string) {
@@ -96,8 +97,38 @@ describe(`${S3Provider.name} functional tests`, () => {
     });
   });
 
+  const objectExists = async (object: string): Promise<boolean> => {
+    return new Promise<boolean>((resolve, reject) => {
+      let objectFound = false;
+      const stream = client.listObjectsV2(S3_BUCKET, object, false);
+      stream.on('error', reject);
+      stream.on('end', () => resolve(objectFound));
+      stream.on('data', (item: any) => {
+        if (item.name == object) {
+          objectFound = true;
+        }
+      });
+    });
+  };
+
   describe(provider.mkdir.name, () => {
-    it('creates a directory', async () => {});
+    it('creates a single directory', async () => {
+      const dir = `${base}/${v4()}/`;
+      await provider.mkdir(dir);
+      await expect(objectExists(dir)).resolves.toBe(true);
+    });
+
+    it('creates nested directories', async () => {
+      const dir = `${base}/${v4()}/${v4()}/${v4()}/${v4()}/`;
+      await provider.mkdir(dir);
+      await expect(objectExists(dir)).resolves.toBe(true);
+    });
+
+    it('handles missing trailing slash', async () => {
+      const dir = `${base}/${v4()}`;
+      await provider.mkdir(dir);
+      await expect(objectExists(`${dir}/`)).resolves.toBe(true);
+    });
   });
 
   describe(provider.readdir.name, () => {
