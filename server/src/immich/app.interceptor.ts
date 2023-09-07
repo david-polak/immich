@@ -5,10 +5,10 @@ import { Reflector } from '@nestjs/core';
 import { transformException } from '@nestjs/platform-express/multer/multer/multer.utils';
 import { createHash } from 'crypto';
 import { NextFunction, RequestHandler } from 'express';
+import { result } from 'lodash';
 import multer, { StorageEngine, diskStorage } from 'multer';
 import { Observable } from 'rxjs';
 import { AuthRequest } from './app.guard';
-import {result} from "lodash";
 
 export enum Route {
   ASSET = 'asset',
@@ -114,9 +114,10 @@ export class FileUploadInterceptor implements NestInterceptor {
   }
 
   private destination(req: AuthRequest, file: Express.Multer.File, callback: DiskStorageCallback) {
-    this.assetService.getUploadFolder(asRequest(req, file))
-      .then(result => callback(null, result))
-      .catch(error => callback(error, ''))
+    this.assetService
+      .getUploadFolder(asRequest(req, file))
+      .then((result) => callback(null, result))
+      .catch((error) => callback(error, ''));
   }
 
   private handleFile(req: AuthRequest, file: Express.Multer.File, callback: Callback<Partial<ImmichFile>>) {
