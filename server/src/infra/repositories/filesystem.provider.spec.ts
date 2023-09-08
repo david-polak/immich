@@ -86,4 +86,44 @@ describe(`${FilesystemProvider.name}`, () => {
       await expect(provider.unlink(path)).rejects.toThrow();
     });
   });
+
+  describe(provider.unlinkDir.name, () => {
+    it('removes an empty directory', async () => {
+      const dir = join(baseDir, v4());
+      await fs.mkdir(dir);
+      await expect(dirExists(dir)).resolves.toBe(true);
+      await provider.unlinkDir(dir, { recursive: true });
+      await expect(dirExists(dir)).resolves.toBe(false);
+    });
+
+    it('removes a directory', async () => {
+      const dir = join(baseDir, v4());
+      const file = join(dir, v4());
+      await fs.mkdir(dir);
+      await createFile(file);
+      await expect(dirExists(dir)).resolves.toBe(true);
+      await expect(fileExists(file)).resolves.toBe(true);
+
+      await provider.unlinkDir(dir, { recursive: true });
+      await expect(dirExists(dir)).resolves.toBe(false);
+      await expect(fileExists(file)).resolves.toBe(false);
+    });
+
+    it('removes nested directories', async () => {
+      const dirA = join(baseDir, v4());
+      const dirB = join(dirA, v4());
+      const file = join(dirB, v4());
+      await fs.mkdir(dirA);
+      await fs.mkdir(dirB);
+      await createFile(file);
+      await expect(dirExists(dirA)).resolves.toBe(true);
+      await expect(dirExists(dirB)).resolves.toBe(true);
+      await expect(fileExists(file)).resolves.toBe(true);
+
+      await provider.unlinkDir(dirA, { recursive: true });
+      await expect(dirExists(dirA)).resolves.toBe(false);
+      await expect(dirExists(dirB)).resolves.toBe(false);
+      await expect(fileExists(file)).resolves.toBe(false);
+    });
+  });
 });

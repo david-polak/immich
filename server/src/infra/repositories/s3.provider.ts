@@ -90,6 +90,10 @@ export class S3Provider implements IStorageRepository {
   }
 
   async unlinkDir(folder: string, options?: { recursive?: boolean; force?: boolean }): Promise<void> {
-    return this.client.removeObjects(this.bucket, [folder]);
+    if (!options || !options.recursive) {
+      return this.unlink(folder);
+    }
+    return Promise.resolve();
+    // return this.client.removeObjects(this.bucket, [folder]);
   }
 }
