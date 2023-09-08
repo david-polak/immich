@@ -62,7 +62,7 @@ export class S3Provider implements IStorageRepository {
     });
   }
 
-  createZipStream(): ImmichZipStream {
+  async createZipStream(): Promise<ImmichZipStream> {
     // TODO: ---------------------------------------------------------------------
     return {
       stream: new Readable(),

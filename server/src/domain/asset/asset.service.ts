@@ -227,7 +227,7 @@ export class AssetService {
   async downloadArchive(authUser: AuthUserDto, dto: AssetIdsDto): Promise<ImmichReadStream> {
     await this.access.requirePermission(authUser, Permission.ASSET_DOWNLOAD, dto.assetIds);
 
-    const zip = this.storageRepository.createZipStream();
+    const zip = await this.storageRepository.createZipStream();
     const assets = await this.assetRepository.getByIds(dto.assetIds);
     const paths: Record<string, number> = {};
 

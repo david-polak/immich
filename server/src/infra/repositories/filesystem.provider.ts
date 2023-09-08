@@ -9,7 +9,7 @@ import path from 'path';
 const moveFile = promisify<string, string, mv.Options>(mv);
 
 export class FilesystemProvider implements IStorageRepository {
-  createZipStream(): ImmichZipStream {
+  async createZipStream(): Promise<ImmichZipStream> {
     const archive = archiver('zip', { store: true });
 
     const addFile = (input: string, filename: string) => {
@@ -18,7 +18,7 @@ export class FilesystemProvider implements IStorageRepository {
 
     const finalize = () => archive.finalize();
 
-    return { stream: archive, addFile, finalize };
+    return Promise.resolve({ stream: archive, addFile, finalize });
   }
 
   async createReadStream(filepath: string, mimeType?: string | null): Promise<ImmichReadStream> {

@@ -20,7 +20,7 @@ export interface DiskUsage {
 export const IStorageRepository = 'IStorageRepository';
 
 export interface IStorageRepository {
-  createZipStream(): ImmichZipStream;
+  createZipStream(): Promise<ImmichZipStream>;
   createReadStream(filepath: string, mimeType?: string | null): Promise<ImmichReadStream>;
   unlink(filepath: string): Promise<void>;
   unlinkDir(folder: string, options?: { recursive?: boolean; force?: boolean }): Promise<void>;
