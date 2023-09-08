@@ -17,8 +17,21 @@ describe(`${FilesystemProvider.name}`, () => {
   });
 
   const dirExists = async (dir: string): Promise<boolean> => {
-    const stats = await fs.stat(dir);
-    return Promise.resolve(stats.isDirectory());
+    try {
+      const stats = await fs.stat(dir);
+      return Promise.resolve(stats.isDirectory());
+    } catch (e) {
+      return Promise.resolve(false);
+    }
+  };
+
+  const fileExists = async (filepath: string): Promise<boolean> => {
+    try {
+      const stats = await fs.stat(filepath);
+      return Promise.resolve(stats.isFile());
+    } catch (e) {
+      return Promise.resolve(false);
+    }
   };
 
   const createFile = async (filepath: string, contents: string | undefined = undefined): Promise<void> => {
@@ -55,6 +68,17 @@ describe(`${FilesystemProvider.name}`, () => {
       await createFile(join(dir, fileB));
       const expected = [fileA, fileB].sort();
       await expect(provider.readdir(dir)).resolves.toEqual(expected);
+    });
+  });
+
+  describe(provider.unlink.name, () => {
+    it('removes a file', async () => {
+      const file = v4();
+      const path = join(baseDir, file);
+      await createFile(path);
+      await expect(fileExists(path)).resolves.toBe(true);
+      await provider.unlink(path);
+      await expect(fileExists(path)).resolves.toBe(false);
     });
   });
 });
