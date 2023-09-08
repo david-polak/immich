@@ -3,6 +3,7 @@ import { S3Provider } from '@app/infra/repositories/s3.provider';
 import { uuidStub } from '@test';
 import fs from 'fs/promises';
 import { BucketItem, BucketStream, Client, UploadedObjectInfo } from 'minio';
+import { join } from 'path';
 import { v4 } from 'uuid';
 
 class S3ProviderMock extends S3Provider implements IStorageRepository {
@@ -205,6 +206,32 @@ describe(`${S3Provider.name} functional tests`, () => {
       await expect(dirExists(dirA)).resolves.toBe(false);
       await expect(dirExists(dirB)).resolves.toBe(false);
       await expect(fileExists(file)).resolves.toBe(false);
+    });
+  });
+
+  describe(provider.moveFile.name, () => {
+    it('moves files', async () => {
+      const fileA = join(baseDir, v4());
+      const fileB = join(baseDir, v4());
+      await createFile(fileA);
+      await expect(fileExists(fileA)).resolves.toBe(true);
+
+      await provider.moveFile(fileA, fileB);
+      await expect(fileExists(fileA)).resolves.toBe(false);
+      await expect(fileExists(fileB)).resolves.toBe(true);
+    });
+
+    it('throws on existing file', async () => {
+      const fileA = join(baseDir, v4());
+      const fileB = join(baseDir, v4());
+      await createFile(fileA);
+      await createFile(fileB);
+      await expect(fileExists(fileA)).resolves.toBe(true);
+      await expect(fileExists(fileB)).resolves.toBe(true);
+
+      await expect(provider.moveFile(fileA, fileB)).rejects.toThrow();
+      await expect(fileExists(fileA)).resolves.toBe(true);
+      await expect(fileExists(fileB)).resolves.toBe(true);
     });
   });
 });

@@ -91,7 +91,6 @@ export class S3Provider implements IStorageRepository {
 
   async unlinkDir(folder: string, options?: { recursive?: boolean; force?: boolean }): Promise<void> {
     const prefix = folder.endsWith('/') ? folder : `${folder}/`;
-    console.log(prefix);
     return new Promise<void>((resolve, reject) => {
       const data: string[] = [];
       const stream: BucketStream<BucketItem> = this.client.listObjectsV2(this.bucket, prefix, true);
