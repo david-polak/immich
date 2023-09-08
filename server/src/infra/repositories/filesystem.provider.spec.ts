@@ -34,6 +34,10 @@ describe(`${FilesystemProvider.name}`, () => {
     }
   };
 
+  const createDirectory = async (dir: string): Promise<string | void> => {
+    return fs.mkdir(dir, { recursive: true });
+  };
+
   const createFile = async (filepath: string, contents: string | undefined = undefined): Promise<void> => {
     let data: Buffer;
     if (contents) {
@@ -63,7 +67,7 @@ describe(`${FilesystemProvider.name}`, () => {
       const dir = join(baseDir, v4());
       const fileA = v4();
       const fileB = v4();
-      await fs.mkdir(dir);
+      await createDirectory(dir);
       await createFile(join(dir, fileA));
       await createFile(join(dir, fileB));
       const expected = [fileA, fileB].sort();
@@ -90,7 +94,7 @@ describe(`${FilesystemProvider.name}`, () => {
   describe(provider.unlinkDir.name, () => {
     it('removes an empty directory', async () => {
       const dir = join(baseDir, v4());
-      await fs.mkdir(dir);
+      await createDirectory(dir);
       await expect(dirExists(dir)).resolves.toBe(true);
       await provider.unlinkDir(dir, { recursive: true });
       await expect(dirExists(dir)).resolves.toBe(false);
@@ -99,7 +103,7 @@ describe(`${FilesystemProvider.name}`, () => {
     it('removes a directory', async () => {
       const dir = join(baseDir, v4());
       const file = join(dir, v4());
-      await fs.mkdir(dir);
+      await createDirectory(dir);
       await createFile(file);
       await expect(dirExists(dir)).resolves.toBe(true);
       await expect(fileExists(file)).resolves.toBe(true);
@@ -113,8 +117,8 @@ describe(`${FilesystemProvider.name}`, () => {
       const dirA = join(baseDir, v4());
       const dirB = join(dirA, v4());
       const file = join(dirB, v4());
-      await fs.mkdir(dirA);
-      await fs.mkdir(dirB);
+      await createDirectory(dirA);
+      await createDirectory(dirB);
       await createFile(file);
       await expect(dirExists(dirA)).resolves.toBe(true);
       await expect(dirExists(dirB)).resolves.toBe(true);
