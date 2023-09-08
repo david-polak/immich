@@ -26,6 +26,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   async checkDiskUsage(folder: string): Promise<DiskUsage> {
+    // TODO: ---------------------------------------------------------------------
     return Promise.resolve({
       available: 1000,
       free: 1000,
@@ -59,6 +60,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   createZipStream(): ImmichZipStream {
+    // TODO: ---------------------------------------------------------------------
     return {
       stream: new Readable(),
       addFile: () => {},
@@ -114,6 +116,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   async removeEmptyDirs(folder: string): Promise<void> {
+    // TODO: ---------------------------------------------------------------------
     return Promise.resolve(undefined);
   }
 
