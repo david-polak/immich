@@ -33,31 +33,6 @@ describe(S3Provider.name, () => {
       });
       provider.mkdir('create/1/directory/');
     });
-
-    it('creates a directory 2', async () => {
-      await provider.mkdir('test/empty/');
-      await provider.mkdir('test/notempty/');
-      // await provider.mkdir("create/2/directory/")
-    });
-  });
-
-  describe(provider.readdir.name, () => {
-    it('reads dir', async () => {
-      let data = await provider.readdir('create/');
-      console.log(data);
-    });
-  });
-
-  describe(provider.unlink.name, () => {
-    it('removes a single file', async () => {
-      await provider.unlink('create/setup');
-    });
-  });
-
-  describe(provider.unlinkDir.name, () => {
-    it('removes an empty directory', async () => {
-      await provider.unlinkDir('test/notempty/');
-    });
   });
 });
 
