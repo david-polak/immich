@@ -1,9 +1,6 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
 import archiver from 'archiver';
-import fs, { readdir } from 'fs/promises';
-import { BucketItem, BucketItemStat, BucketStream, Client, CopyConditions, UploadedObjectInfo } from 'minio';
-import path from 'path';
-import { Readable } from 'stream';
+import { BucketItem, BucketStream, Client, CopyConditions } from 'minio';
 
 const S3_BUCKET = process.env.S3_BUCKET || '';
 const S3_HOSTNAME = process.env.S3_HOSTNAME || '';
