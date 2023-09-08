@@ -80,5 +80,10 @@ describe(`${FilesystemProvider.name}`, () => {
       await provider.unlink(path);
       await expect(fileExists(path)).resolves.toBe(false);
     });
+
+    it('rejects on non-existent file', async () => {
+      const path = join(baseDir, v4());
+      await expect(provider.unlink(path)).rejects.toThrow();
+    });
   });
 });

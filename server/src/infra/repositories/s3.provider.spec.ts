@@ -2,6 +2,7 @@ import { IStorageRepository } from '@app/domain';
 import { S3Provider } from '@app/infra/repositories/s3.provider';
 import { uuidStub } from '@test';
 import { BucketItem, BucketStream, Client, UploadedObjectInfo } from 'minio';
+import { join } from 'path';
 import { v4 } from 'uuid';
 
 class S3ProviderMock extends S3Provider implements IStorageRepository {
