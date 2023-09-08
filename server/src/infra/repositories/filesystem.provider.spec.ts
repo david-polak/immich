@@ -3,7 +3,10 @@ import fs from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Readable } from 'stream';
+import * as unzipper from 'unzipper';
+import { BufferStream, Open } from 'unzipper';
 import { v4 } from 'uuid';
+import file = Open.file;
 
 describe(`${FilesystemProvider.name}`, () => {
   const baseDir = join(tmpdir(), new Date(Date.now()).toISOString());
@@ -203,6 +206,48 @@ describe(`${FilesystemProvider.name}`, () => {
       await expect(fileExists(file)).resolves.toBe(true);
       const stream = await provider.createReadStream(file);
       expect(stream.length).toEqual(content.length);
+    });
+  });
+
+  describe(provider.createZipStream.name, () => {
+    it('zips files', async () => {
+      const files: any[] = [];
+      const numFiles = 5;
+      const zipStream = await provider.createZipStream();
+
+      for (let i = 0; i < numFiles; i++) {
+        const file = {
+          filename: v4(),
+          content: v4(),
+          path: join(baseDir, v4()),
+        };
+        files.push(file);
+        await createFile(file.path, file.content);
+        zipStream.addFile(file.path, file.filename);
+      }
+
+      await zipStream.finalize();
+
+      let filesFound = 0;
+
+      await new Promise<void>((resolve, reject) => {
+        zipStream.stream
+          .pipe(unzipper.Parse())
+          .on('entry', async (entry) => {
+            const filename = entry.path;
+            for (const file of files) {
+              if (filename === file.filename) {
+                filesFound = filesFound + 1;
+                const content = await entry.buffer();
+                expect(content.toString()).toEqual(file.content);
+              }
+            }
+          })
+          .on('end', () => resolve())
+          .on('error', reject);
+      });
+
+      expect(filesFound).toEqual(numFiles);
     });
   });
 });

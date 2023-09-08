@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 import { BucketItem, BucketStream, Client, UploadedObjectInfo } from 'minio';
 import { join } from 'path';
 import { Readable } from 'stream';
+import * as unzipper from 'unzipper';
 import { v4 } from 'uuid';
 
 class S3ProviderMock extends S3Provider implements IStorageRepository {
@@ -278,6 +279,48 @@ describe(`${S3Provider.name} functional tests`, () => {
       await expect(fileExists(file)).resolves.toBe(true);
       const stream = await provider.createReadStream(file);
       expect(stream.length).toEqual(content.length);
+    });
+  });
+
+  describe(provider.createZipStream.name, () => {
+    it('zips files', async () => {
+      const files: any[] = [];
+      const numFiles = 5;
+      const zipStream = await provider.createZipStream();
+
+      for (let i = 0; i < numFiles; i++) {
+        const file = {
+          filename: v4(),
+          content: v4(),
+          path: join(baseDir, v4()),
+        };
+        files.push(file);
+        await createFile(file.path, file.content);
+        zipStream.addFile(file.path, file.filename);
+      }
+
+      await zipStream.finalize();
+
+      let filesFound = 0;
+
+      await new Promise<void>((resolve, reject) => {
+        zipStream.stream
+          .pipe(unzipper.Parse())
+          .on('entry', async (entry) => {
+            const filename = entry.path;
+            for (const file of files) {
+              if (filename === file.filename) {
+                filesFound = filesFound + 1;
+                const content = await entry.buffer();
+                expect(content.toString()).toEqual(file.content);
+              }
+            }
+          })
+          .on('end', () => resolve())
+          .on('error', reject);
+      });
+
+      expect(filesFound).toEqual(numFiles);
     });
   });
 });

@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@types/unzipper": "^0.10.7",
+    "unzipper": "^0.10.14"
+  }
+}
