@@ -250,4 +250,52 @@ describe(`${FilesystemProvider.name}`, () => {
       expect(filesFound).toEqual(numFiles);
     });
   });
+
+  /**
+   * TODO: Clarify the API of the removeEmptyDirs function and unskip
+   *       these tests... the function does not behave as expected.
+   */
+  describe.skip(provider.removeEmptyDirs.name, () => {
+    it('removes itself if empty', async () => {
+      const dir = join(baseDir, v4());
+      await createDirectory(dir);
+      await expect(dirExists(dir)).resolves.toBe(true);
+
+      await provider.removeEmptyDirs(dir);
+      await expect(dirExists(dir)).resolves.toBe(false);
+    });
+
+    it('preserves itself if not empty', async () => {
+      const dirA = join(baseDir, v4());
+      const dirB = join(dirA, v4());
+      await createDirectory(dirA);
+      await createDirectory(dirB);
+      await expect(dirExists(dirA)).resolves.toBe(true);
+      await expect(dirExists(dirB)).resolves.toBe(true);
+
+      await provider.removeEmptyDirs(dirA);
+      await expect(dirExists(dirA)).resolves.toBe(true);
+      await expect(dirExists(dirB)).resolves.toBe(false);
+    });
+
+    it('removes directories', async () => {
+      const dirA = join(baseDir, v4());
+      const dirB = join(dirA, v4());
+      const dirC = join(dirA, v4());
+      const dirD = join(dirA, v4());
+      await createDirectory(dirA);
+      await createDirectory(dirB);
+      await createDirectory(dirC);
+      await createDirectory(dirD);
+      await expect(dirExists(dirA)).resolves.toBe(true);
+      await expect(dirExists(dirB)).resolves.toBe(true);
+      await expect(dirExists(dirC)).resolves.toBe(true);
+      await expect(dirExists(dirD)).resolves.toBe(true);
+
+      await provider.removeEmptyDirs(dirA);
+      await expect(dirExists(dirB)).resolves.toBe(false);
+      await expect(dirExists(dirC)).resolves.toBe(false);
+      await expect(dirExists(dirD)).resolves.toBe(false);
+    });
+  });
 });

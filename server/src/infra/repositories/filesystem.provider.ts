@@ -73,7 +73,7 @@ export class FilesystemProvider implements IStorageRepository {
     if (self) {
       const updated = await fs.readdir(directory);
       if (updated.length === 0) {
-        await fs.rmdir(directory);
+        await fs.rm(directory);
       }
     }
   }
