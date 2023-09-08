@@ -33,7 +33,12 @@ export class S3Provider implements IStorageRepository {
   }
 
   async checkFileExists(filepath: string, mode?: number): Promise<boolean> {
-    return Promise.resolve(false);
+    return new Promise<boolean>((resolve, reject) => {
+      this.client
+        .statObject(this.bucket, filepath)
+        .then(() => resolve(true))
+        .catch(() => resolve(false));
+    });
   }
 
   async createReadStream(filepath: string, mimeType?: string | null): Promise<ImmichReadStream> {

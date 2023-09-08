@@ -234,4 +234,19 @@ describe(`${S3Provider.name} functional tests`, () => {
       await expect(fileExists(fileB)).resolves.toBe(true);
     });
   });
+
+  describe(provider.checkFileExists.name, () => {
+    it('returns true when file exists', async () => {
+      const file = join(baseDir, v4());
+      await createFile(file);
+      await expect(fileExists(file)).resolves.toBe(true);
+      await expect(provider.checkFileExists(file)).resolves.toBe(true);
+    });
+
+    it('returns false when file does not exist', async () => {
+      const file = join(baseDir, v4());
+      await expect(fileExists(file)).resolves.toBe(false);
+      await expect(provider.checkFileExists(file)).resolves.toBe(false);
+    });
+  });
 });
