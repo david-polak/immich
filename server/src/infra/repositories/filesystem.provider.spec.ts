@@ -2,6 +2,7 @@ import { FilesystemProvider } from '@app/infra/repositories/filesystem.provider'
 import fs from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { Readable } from 'stream';
 import { v4 } from 'uuid';
 
 describe(`${FilesystemProvider.name}`, () => {
@@ -38,14 +39,27 @@ describe(`${FilesystemProvider.name}`, () => {
     return fs.mkdir(dir, { recursive: true });
   };
 
-  const createFile = async (filepath: string, contents: string | undefined = undefined): Promise<void> => {
+  const createFile = async (filepath: string, content: string | undefined = undefined): Promise<void> => {
     let data: Buffer;
-    if (contents) {
-      data = Buffer.from(contents);
+    if (content) {
+      data = Buffer.from(content);
     } else {
       data = Buffer.from(v4());
     }
     return fs.writeFile(filepath, data);
+  };
+
+  const validateStream = async (expected: string, stream: Readable): Promise<boolean> => {
+    return new Promise<boolean>((resolve, reject) => {
+      let data: Buffer = new Buffer('');
+      stream.on('data', (chunk: Buffer) => {
+        data = Buffer.concat([data, chunk]);
+      });
+      stream.on('end', () => {
+        resolve(data.toString() === expected);
+      });
+      stream.on('error', reject);
+    });
   };
 
   describe(provider.mkdir.name, () => {
@@ -169,6 +183,26 @@ describe(`${FilesystemProvider.name}`, () => {
       const file = join(baseDir, v4());
       await expect(fileExists(file)).resolves.toBe(false);
       await expect(provider.checkFileExists(file)).resolves.toBe(false);
+    });
+  });
+
+  describe(provider.createReadStream.name, () => {
+    it('returns readable stream', async () => {
+      const file = join(baseDir, v4());
+      const content = v4();
+      await createFile(file, content);
+      await expect(fileExists(file)).resolves.toBe(true);
+      const stream = await provider.createReadStream(file);
+      await expect(validateStream(content, stream.stream)).resolves.toBe(true);
+    });
+
+    it('returns correct length', async () => {
+      const file = join(baseDir, v4());
+      const content = v4();
+      await createFile(file, content);
+      await expect(fileExists(file)).resolves.toBe(true);
+      const stream = await provider.createReadStream(file);
+      expect(stream.length).toEqual(content.length);
     });
   });
 });

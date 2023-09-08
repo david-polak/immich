@@ -1,4 +1,5 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
+import fs from 'fs/promises';
 import { BucketItem, BucketStream, Client, CopyConditions, UploadedObjectInfo } from 'minio';
 import { Readable } from 'stream';
 
@@ -42,8 +43,18 @@ export class S3Provider implements IStorageRepository {
   }
 
   async createReadStream(filepath: string, mimeType?: string | null): Promise<ImmichReadStream> {
-    return Promise.resolve({
-      stream: new Readable(),
+    const stat = await this.client.statObject(this.bucket, filepath);
+    return new Promise<ImmichReadStream>((resolve, reject) => {
+      this.client
+        .getObject(this.bucket, filepath)
+        .then((stream) =>
+          resolve({
+            stream: stream,
+            length: stat.size,
+            type: mimeType || undefined,
+          }),
+        )
+        .catch(reject);
     });
   }
 
