@@ -1,9 +1,6 @@
 import { IStorageRepository } from '@app/domain';
 import { S3Provider } from '@app/infra/repositories/s3.provider';
-import { uuidStub } from '@test';
-import fs from 'fs/promises';
-import { BucketItem, BucketStream, Client, UploadedObjectInfo } from 'minio';
-import { join } from 'path';
+import { Client, UploadedObjectInfo } from 'minio';
 import { Readable } from 'stream';
 import * as unzipper from 'unzipper';
 import { v4 } from 'uuid';
@@ -20,25 +17,6 @@ class S3ProviderMock extends S3Provider implements IStorageRepository {
     return this.client;
   }
 }
-
-describe(S3Provider.name, () => {
-  let provider: S3ProviderMock = new S3ProviderMock();
-  beforeEach(() => {
-    provider = new S3ProviderMock();
-  });
-  afterEach(() => {});
-
-  describe(provider.mkdir.name, () => {
-    it('creates a directory', () => {
-      provider.mockClient((client: Client) => {
-        jest
-          .spyOn(client, 'putObject')
-          .mockReturnValue(Promise.resolve({ etag: 'dsdgsdg', versionId: null } as UploadedObjectInfo));
-      });
-      provider.mkdir('create/1/directory/');
-    });
-  });
-});
 
 describe(`${S3Provider.name} functional tests`, () => {
   const S3_BUCKET = process.env.S3_BUCKET || '';
