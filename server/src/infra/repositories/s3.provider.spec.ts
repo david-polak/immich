@@ -107,7 +107,8 @@ describe(`${S3Provider.name} functional tests`, () => {
   };
 
   const createDirectory = async (dir: string): Promise<UploadedObjectInfo> => {
-    return client.putObject(S3_BUCKET, dir, '', 0);
+    const prefix = dir.endsWith('/') ? dir : `${dir}/`;
+    return client.putObject(S3_BUCKET, prefix, '', 0);
   };
 
   const createFile = async (
