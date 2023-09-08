@@ -1,5 +1,5 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
-import { BucketItem, BucketStream, Client, UploadedObjectInfo } from 'minio';
+import { BucketItem, BucketStream, Client, CopyConditions, UploadedObjectInfo } from 'minio';
 import { Readable } from 'stream';
 
 const S3_BUCKET = process.env.S3_BUCKET || '';
@@ -58,7 +58,23 @@ export class S3Provider implements IStorageRepository {
   }
 
   async moveFile(source: string, target: string): Promise<void> {
-    return Promise.resolve(undefined);
+    // bucket prefix is required for the source
+    const prefixedSource = `${this.bucket}/${source}`;
+
+    if (await this.checkFileExists(target)) {
+      throw new Error(`Can not move ${source} to ${target}. ${target} already exists`);
+    }
+
+    return new Promise((resolve, reject) => {
+      this.client
+        .copyObject(this.bucket, target, prefixedSource, new CopyConditions())
+        .then(() => {
+          this.unlink(source)
+            .then(() => resolve())
+            .catch(reject);
+        })
+        .catch(reject);
+    });
   }
 
   async readdir(folder: string): Promise<string[]> {
