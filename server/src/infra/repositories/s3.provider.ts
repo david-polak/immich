@@ -1,6 +1,8 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
 import archiver from 'archiver';
-import { BucketItem, BucketStream, Client, CopyConditions, UploadedObjectInfo } from 'minio';
+import fs, { readdir } from 'fs/promises';
+import { BucketItem, BucketItemStat, BucketStream, Client, CopyConditions, UploadedObjectInfo } from 'minio';
+import path from 'path';
 import { Readable } from 'stream';
 
 const S3_BUCKET = process.env.S3_BUCKET || '';
@@ -121,22 +123,42 @@ export class S3Provider implements IStorageRepository {
       const data: string[] = [];
       const stream: BucketStream<BucketItem> = this.client.listObjectsV2(this.bucket, prefix, false);
       stream.on('error', reject);
-      stream.on('end', () => resolve(data));
+      stream.on('end', () => resolve(data.sort()));
       stream.on('data', (item) => {
         if (!item.name) {
+          if (item.prefix) {
+            // pushing directories without the trailing slash
+            data.push(item.prefix.substring(prefixLength, item.prefix.length - 1));
+          }
           return;
         }
         if (item.name === prefix) {
+          // ignoring self
           return;
         }
+        // pushing files
         data.push(item.name.substring(prefixLength));
       });
     });
   }
 
   async removeEmptyDirs(folder: string): Promise<void> {
-    // TODO: ---------------------------------------------------------------------
-    return Promise.resolve(undefined);
+    const directory = folder.endsWith('/') ? folder.substring(-1) : folder;
+    return this._removeEmptyDirsRecursive(directory, true);
+  }
+
+  private async _removeEmptyDirsRecursive(object: string, self: boolean): Promise<void> {
+    const objects = await this.readdir(object);
+    const directory = object;
+
+    await Promise.all(objects.map((item) => this._removeEmptyDirsRecursive(`${directory}/${item}`, false)));
+
+    if (!self) {
+      const postRecursionObjects = await this.readdir(directory);
+      if (postRecursionObjects.length === 0) {
+        await this.unlinkDir(directory);
+      }
+    }
   }
 
   async unlink(filepath: string): Promise<void> {

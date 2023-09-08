@@ -168,6 +168,21 @@ describe(`${S3Provider.name} functional tests`, () => {
       const expected = [fileA, fileB].sort();
       await expect(provider.readdir(dir)).resolves.toEqual(expected);
     });
+
+    it('lists directories', async () => {
+      const dir = join(baseDir, v4());
+      const fileA = v4();
+      const fileB = v4();
+      const dirB = v4();
+      const dirC = v4();
+      await createDirectory(dir);
+      await createFile(join(dir, fileA));
+      await createFile(join(dir, fileB));
+      await createDirectory(join(dir, dirB));
+      await createDirectory(join(dir, dirC));
+      const expected = [fileA, fileB, dirB, dirC].sort();
+      await expect(provider.readdir(dir)).resolves.toEqual(expected);
+    });
   });
 
   describe(provider.unlink.name, () => {
@@ -321,6 +336,81 @@ describe(`${S3Provider.name} functional tests`, () => {
       });
 
       expect(filesFound).toEqual(numFiles);
+    });
+
+    describe(provider.removeEmptyDirs.name, () => {
+      it('preserves itself if empty', async () => {
+        const dir = join(baseDir, v4());
+        await createDirectory(dir);
+        await expect(dirExists(dir)).resolves.toBe(true);
+
+        await provider.removeEmptyDirs(dir);
+        await expect(dirExists(dir)).resolves.toBe(true);
+      });
+
+      it('preserves itself if not empty', async () => {
+        const dirA = join(baseDir, v4());
+        const dirB = join(dirA, v4());
+        await createDirectory(dirA);
+        await createDirectory(dirB);
+        await expect(dirExists(dirA)).resolves.toBe(true);
+        await expect(dirExists(dirB)).resolves.toBe(true);
+
+        await provider.removeEmptyDirs(dirA);
+        await expect(dirExists(dirA)).resolves.toBe(true);
+        await expect(dirExists(dirB)).resolves.toBe(false);
+      });
+
+      it('removes directories', async () => {
+        const dirA = join(baseDir, v4());
+        const dirB = join(dirA, v4());
+        const dirC = join(dirA, v4());
+        const dirD = join(dirA, v4());
+        await createDirectory(dirA);
+        await createDirectory(dirB);
+        await createDirectory(dirC);
+        await createDirectory(dirD);
+        await expect(dirExists(dirA)).resolves.toBe(true);
+        await expect(dirExists(dirB)).resolves.toBe(true);
+        await expect(dirExists(dirC)).resolves.toBe(true);
+        await expect(dirExists(dirD)).resolves.toBe(true);
+
+        await provider.removeEmptyDirs(dirA);
+        await expect(dirExists(dirB)).resolves.toBe(false);
+        await expect(dirExists(dirC)).resolves.toBe(false);
+        await expect(dirExists(dirD)).resolves.toBe(false);
+        await expect(dirExists(dirA)).resolves.toBe(true);
+      });
+
+      it('removes directories without files', async () => {
+        const dirA = join(baseDir, v4());
+        const dirB = join(dirA, v4());
+        const dirC = join(dirA, v4());
+        const dirPreserve = join(dirA, v4());
+        await createDirectory(dirA);
+        await createDirectory(dirB);
+        await createDirectory(dirC);
+        await createDirectory(dirPreserve);
+        const fileA = join(dirPreserve, v4());
+        const fileB = join(dirPreserve, v4());
+        await createFile(fileA);
+        await createFile(fileB);
+        await expect(dirExists(dirA)).resolves.toBe(true);
+        await expect(dirExists(dirB)).resolves.toBe(true);
+        await expect(dirExists(dirC)).resolves.toBe(true);
+        await expect(dirExists(dirPreserve)).resolves.toBe(true);
+        await expect(fileExists(fileA)).resolves.toBe(true);
+        await expect(fileExists(fileB)).resolves.toBe(true);
+
+        await provider.removeEmptyDirs(dirA);
+        await expect(dirExists(dirB)).resolves.toBe(false);
+        await expect(dirExists(dirC)).resolves.toBe(false);
+
+        await expect(dirExists(dirA)).resolves.toBe(true);
+        await expect(dirExists(dirPreserve)).resolves.toBe(true);
+        await expect(fileExists(fileA)).resolves.toBe(true);
+        await expect(fileExists(fileB)).resolves.toBe(true);
+      });
     });
   });
 });
