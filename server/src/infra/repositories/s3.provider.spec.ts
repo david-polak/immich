@@ -150,7 +150,7 @@ describe(`${S3Provider.name} functional tests`, () => {
   });
 
   describe(provider.readdir.name, () => {
-    it('reads dir', async () => {
+    it('reads directory', async () => {
       const dir = `${base}/${v4()}/`;
       const fileA = v4();
       const fileB = v4();
@@ -160,10 +160,28 @@ describe(`${S3Provider.name} functional tests`, () => {
       const expected = [fileA, fileB].sort();
       await expect(provider.readdir(dir)).resolves.toEqual(expected);
     });
+
+    it('handles missing backslash', async () => {
+      const dir = `${base}/${v4()}`;
+      const fileA = v4();
+      const fileB = v4();
+      await putObject(dir);
+      await putObject(`${dir}/${fileA}`, true);
+      await putObject(`${dir}/${fileB}`, true);
+      const expected = [fileA, fileB].sort();
+      await expect(provider.readdir(dir)).resolves.toEqual(expected);
+    });
   });
 
   describe(provider.unlink.name, () => {
-    it('removes a single file', async () => {});
+    it('removes a file', async () => {
+      const file = v4();
+      const path = `${base}/${file}`;
+      await putObject(path, true);
+      await expect(objectExists(path)).resolves.toBe(true);
+      await provider.unlink(path);
+      await expect(objectExists(path)).resolves.toBe(false);
+    });
   });
 
   describe(provider.unlinkDir.name, () => {
