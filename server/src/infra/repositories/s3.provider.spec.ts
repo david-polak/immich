@@ -111,6 +111,24 @@ describe(`${S3Provider.name} functional tests`, () => {
     });
   };
 
+  const putObject = async (
+    objectName: string,
+    file: boolean = false,
+    contents: string | undefined = undefined,
+  ): Promise<UploadedObjectInfo> => {
+    if (file) {
+      let data: Buffer;
+      if (contents) {
+        data = Buffer.from(contents);
+      } else {
+        data = Buffer.from(v4());
+      }
+      return client.putObject(S3_BUCKET, objectName, data);
+    } else {
+      return client.putObject(S3_BUCKET, objectName, '', 0);
+    }
+  };
+
   describe(provider.mkdir.name, () => {
     it('creates a single directory', async () => {
       const dir = `${base}/${v4()}/`;
@@ -132,7 +150,16 @@ describe(`${S3Provider.name} functional tests`, () => {
   });
 
   describe(provider.readdir.name, () => {
-    it('reads dir', async () => {});
+    it('reads dir', async () => {
+      const dir = `${base}/${v4()}/`;
+      const fileA = v4();
+      const fileB = v4();
+      await putObject(dir);
+      await putObject(`${dir}${fileA}`, true);
+      await putObject(`${dir}${fileB}`, true);
+      const expected = [fileA, fileB].sort();
+      await expect(provider.readdir(dir)).resolves.toEqual(expected);
+    });
   });
 
   describe(provider.unlink.name, () => {

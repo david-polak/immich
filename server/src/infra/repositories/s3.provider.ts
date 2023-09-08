@@ -63,19 +63,20 @@ export class S3Provider implements IStorageRepository {
 
   async readdir(folder: string): Promise<string[]> {
     const prefix = folder.endsWith('/') ? folder : `${folder}/`;
+    const prefixLength = prefix.length;
     return new Promise<string[]>((resolve, reject) => {
       const data: string[] = [];
       const stream: BucketStream<BucketItem> = this.client.listObjectsV2(this.bucket, prefix, false);
       stream.on('error', reject);
       stream.on('end', () => resolve(data));
       stream.on('data', (item) => {
-        if (item.name) {
-          // files have names
-          data.push(item.name);
-        } else if (item.prefix) {
-          // directories don't have names, only prefixes
-          data.push(item.prefix);
+        if (!item.name) {
+          return;
         }
+        if (item.name === prefix) {
+          return;
+        }
+        data.push(item.name.substring(prefixLength));
       });
     });
   }
