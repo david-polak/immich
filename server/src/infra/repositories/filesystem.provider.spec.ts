@@ -266,10 +266,6 @@ describe(`${FilesystemProvider.name}`, () => {
     });
   });
 
-  /**
-   * TODO: Clarify the API of the removeEmptyDirs function and unskip
-   *       these tests... the function does not behave as expected.
-   */
   describe(provider.removeEmptyDirs.name, () => {
     it('preserves itself if empty', async () => {
       const dir = join(baseDir, v4());
@@ -312,6 +308,36 @@ describe(`${FilesystemProvider.name}`, () => {
       await expect(dirExists(dirC)).resolves.toBe(false);
       await expect(dirExists(dirD)).resolves.toBe(false);
       await expect(dirExists(dirA)).resolves.toBe(true);
+    });
+
+    it('removes directories without files', async () => {
+      const dirA = join(baseDir, v4());
+      const dirB = join(dirA, v4());
+      const dirC = join(dirA, v4());
+      const dirPreserve = join(dirA, v4());
+      await createDirectory(dirA);
+      await createDirectory(dirB);
+      await createDirectory(dirC);
+      await createDirectory(dirPreserve);
+      const fileA = join(dirPreserve, v4());
+      const fileB = join(dirPreserve, v4());
+      await createFile(fileA);
+      await createFile(fileB);
+      await expect(dirExists(dirA)).resolves.toBe(true);
+      await expect(dirExists(dirB)).resolves.toBe(true);
+      await expect(dirExists(dirC)).resolves.toBe(true);
+      await expect(dirExists(dirPreserve)).resolves.toBe(true);
+      await expect(fileExists(fileA)).resolves.toBe(true);
+      await expect(fileExists(fileB)).resolves.toBe(true);
+
+      await provider.removeEmptyDirs(dirA);
+      await expect(dirExists(dirB)).resolves.toBe(false);
+      await expect(dirExists(dirC)).resolves.toBe(false);
+
+      await expect(dirExists(dirA)).resolves.toBe(true);
+      await expect(dirExists(dirPreserve)).resolves.toBe(true);
+      await expect(fileExists(fileA)).resolves.toBe(true);
+      await expect(fileExists(fileB)).resolves.toBe(true);
     });
   });
 });

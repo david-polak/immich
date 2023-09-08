@@ -57,7 +57,7 @@ export class FilesystemProvider implements IStorageRepository {
   }
 
   async removeEmptyDirs(directory: string) {
-    this._removeEmptyDirs(directory, false);
+    return this._removeEmptyDirs(directory, false);
   }
 
   private async _removeEmptyDirs(directory: string, self: boolean) {
@@ -73,7 +73,7 @@ export class FilesystemProvider implements IStorageRepository {
     if (self) {
       const updated = await fs.readdir(directory);
       if (updated.length === 0) {
-        await fs.rm(directory);
+        await fs.rmdir(directory);
       }
     }
   }
