@@ -1,7 +1,5 @@
 import { FilesystemProvider } from '@app/infra/repositories/filesystem.provider';
 import fs from 'fs/promises';
-import { after } from 'lodash';
-import { UploadedObjectInfo } from 'minio';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { v4 } from 'uuid';
