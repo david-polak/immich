@@ -1,4 +1,5 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
+import archiver from 'archiver';
 import { BucketItem, BucketStream, Client, CopyConditions, UploadedObjectInfo } from 'minio';
 import { Readable } from 'stream';
 
@@ -63,14 +64,29 @@ export class S3Provider implements IStorageRepository {
   }
 
   async createZipStream(): Promise<ImmichZipStream> {
-    // TODO: ---------------------------------------------------------------------
-    return {
-      stream: new Readable(),
-      addFile: () => {},
-      finalize: () => {
-        return Promise.resolve();
-      },
+    const archive = archiver('zip', { store: true });
+    const promises: Promise<void>[] = [];
+
+    const addFile = (input: string, filename: string) => {
+      promises.push(
+        new Promise<void>((resolve, reject) => {
+          this.client
+            .getObject(this.bucket, input)
+            .then((stream) => {
+              archive.append(stream, { name: filename });
+              resolve();
+            })
+            .catch(reject);
+        }),
+      );
     };
+
+    const finalize = async (): Promise<void> => {
+      await Promise.all(promises);
+      await archive.finalize();
+    };
+
+    return Promise.resolve({ stream: archive, addFile, finalize });
   }
 
   async mkdir(filepath: string): Promise<void> {
