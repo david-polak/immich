@@ -1,5 +1,4 @@
 import { DiskUsage, ImmichReadStream, ImmichZipStream, IStorageRepository } from '@app/domain';
-import fs from 'fs/promises';
 import { BucketItem, BucketStream, Client, CopyConditions, UploadedObjectInfo } from 'minio';
 import { Readable } from 'stream';
 
@@ -25,12 +24,16 @@ export class S3Provider implements IStorageRepository {
     this.bucket = S3_BUCKET;
   }
 
+  /**
+   * Disk Usage is not supported on S3, defaulting to 1TiB.
+   *
+   * TODO: Update web to hide disk usage when S3 is enabled.
+   */
   async checkDiskUsage(folder: string): Promise<DiskUsage> {
-    // TODO: ---------------------------------------------------------------------
     return Promise.resolve({
-      available: 1000,
-      free: 1000,
-      total: 1000,
+      available: 1099511627776,
+      free: 1099511627776,
+      total: 1099511627776,
     });
   }
 
