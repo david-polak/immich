@@ -1,6 +1,6 @@
-import e from 'express';
-import { Client, UploadedObjectInfo } from 'minio';
-import { StorageEngine } from 'multer';
+import { AuthRequest } from '@app/immich/app.guard';
+import { Client } from 'minio';
+import { DiskStorageOptions, StorageEngine } from 'multer';
 
 const S3_BUCKET = process.env.S3_BUCKET || '';
 const S3_HOSTNAME = process.env.S3_HOSTNAME || '';
@@ -9,11 +9,29 @@ const S3_USE_SSL = process.env.S3_USE_SSL === 'true';
 const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY || '';
 const S3_SECRET_KEY = process.env.S3_SECRET_KEY || '';
 
+type DiskStorageCallback = (error: Error | null, result: string) => void;
+
 export class S3StorageEngine implements StorageEngine {
   protected client: Client;
   protected bucket: string;
 
-  constructor() {
+  protected destination: (req: AuthRequest, file: Express.Multer.File, callback: DiskStorageCallback) => void;
+  protected filename: (req: AuthRequest, file: Express.Multer.File, callback: DiskStorageCallback) => void;
+
+  constructor(options: DiskStorageOptions) {
+    if (!options.destination) {
+      throw Error('options.destination is not defined');
+    }
+    if (typeof options.destination === 'string') {
+      throw Error('options.destination of type string is not supported');
+    }
+    if (!options.filename) {
+      throw Error('options.filename is not defined');
+    }
+
+    this.destination = options.destination;
+    this.filename = options.filename;
+
     this.client = new Client({
       endPoint: S3_HOSTNAME,
       port: S3_PORT,
@@ -25,21 +43,35 @@ export class S3StorageEngine implements StorageEngine {
   }
 
   _handleFile(
-    req: e.Request,
+    req: AuthRequest,
     file: Express.Multer.File,
     callback: (error?: any, info?: Partial<Express.Multer.File>) => void,
   ): void {
-    this.client
-      .putObject(this.bucket, file.filename, file.stream)
-      .then(() => {
-        callback(null, {
-          filename: file.filename,
-        });
-      })
-      .catch((error) => callback(error));
+    this.destination(req, file, (err: any, destination: string) => {
+      if (err) {
+        return callback(err);
+      }
+      this.filename(req, file, (err: any, filename: string) => {
+        if (err) {
+          return callback(err);
+        }
+
+        const path = `${destination}/${filename}`;
+
+        this.client
+          .putObject(this.bucket, path, file.stream)
+          .then(() => {
+            callback(null, {
+              filename: filename,
+              destination: destination,
+            });
+          })
+          .catch((error) => callback(error));
+      });
+    });
   }
 
-  _removeFile(req: e.Request, file: Express.Multer.File, callback: (error: Error | null) => void): void {
+  _removeFile(req: AuthRequest, file: Express.Multer.File, callback: (error: Error | null) => void): void {
     this.client
       .removeObjects(this.bucket, [file.filename])
       .then(() => callback(null))

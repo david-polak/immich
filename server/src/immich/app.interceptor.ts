@@ -1,4 +1,5 @@
 import { AssetService, UploadFieldName, UploadFile } from '@app/domain';
+import { S3StorageEngine } from '@app/infra/s3.storage-engine';
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { PATH_METADATA } from '@nestjs/common/constants';
 import { Reflector } from '@nestjs/core';
@@ -64,7 +65,12 @@ export class FileUploadInterceptor implements NestInterceptor {
     private reflect: Reflector,
     private assetService: AssetService,
   ) {
-    this.defaultStorage = diskStorage({
+    // this.defaultStorage = diskStorage({
+    //   filename: this.filename.bind(this),
+    //   destination: this.destination.bind(this),
+    // });
+
+    this.defaultStorage = new S3StorageEngine({
       filename: this.filename.bind(this),
       destination: this.destination.bind(this),
     });
