@@ -4,9 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { Readable } from 'stream';
 import * as unzipper from 'unzipper';
-import { BufferStream, Open } from 'unzipper';
 import { v4 } from 'uuid';
-import file = Open.file;
 
 describe(`${FilesystemProvider.name}`, () => {
   const baseDir = join(tmpdir(), new Date(Date.now()).toISOString());
@@ -54,7 +52,7 @@ describe(`${FilesystemProvider.name}`, () => {
 
   const validateStream = async (expected: string, stream: Readable): Promise<boolean> => {
     return new Promise<boolean>((resolve, reject) => {
-      let data: Buffer = new Buffer('');
+      let data: Buffer = Buffer.from('');
       stream.on('data', (chunk: Buffer) => {
         data = Buffer.concat([data, chunk]);
       });

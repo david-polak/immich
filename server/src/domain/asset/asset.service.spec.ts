@@ -373,7 +373,7 @@ describe(AssetService.name, () => {
 
       accessMock.asset.hasOwnerAccess.mockResolvedValue(true);
       assetMock.getByIds.mockResolvedValue([assetStub.noResizePath, assetStub.noWebpPath]);
-      storageMock.createZipStream.mockReturnValue(archiveMock);
+      storageMock.createZipStream.mockReturnValue(Promise.resolve(archiveMock));
 
       await expect(sut.downloadArchive(authStub.admin, { assetIds: ['asset-1', 'asset-2'] })).resolves.toEqual({
         stream: archiveMock.stream,
@@ -393,7 +393,7 @@ describe(AssetService.name, () => {
 
       accessMock.asset.hasOwnerAccess.mockResolvedValue(true);
       assetMock.getByIds.mockResolvedValue([assetStub.noResizePath, assetStub.noResizePath]);
-      storageMock.createZipStream.mockReturnValue(archiveMock);
+      storageMock.createZipStream.mockReturnValue(Promise.resolve(archiveMock));
 
       await expect(sut.downloadArchive(authStub.admin, { assetIds: ['asset-1', 'asset-2'] })).resolves.toEqual({
         stream: archiveMock.stream,

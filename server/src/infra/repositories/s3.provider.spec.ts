@@ -18,7 +18,10 @@ class S3ProviderMock extends S3Provider implements IStorageRepository {
   }
 }
 
-describe(`${S3Provider.name} functional tests`, () => {
+/**
+ * Skipped because these are functional tests requiring an S3 server.
+ */
+describe.skip(`${S3Provider.name} functional tests`, () => {
   const S3_BUCKET = process.env.S3_BUCKET || '';
   const S3_HOSTNAME = process.env.S3_HOSTNAME || '';
   const S3_PORT = parseInt(process.env.S3_PORT || '443');
@@ -104,7 +107,7 @@ describe(`${S3Provider.name} functional tests`, () => {
 
   const validateStream = async (expected: string, stream: Readable): Promise<boolean> => {
     return new Promise<boolean>((resolve, reject) => {
-      let data: Buffer = new Buffer('');
+      let data: Buffer = Buffer.from('');
       stream.on('data', (chunk: Buffer) => {
         data = Buffer.concat([data, chunk]);
       });
