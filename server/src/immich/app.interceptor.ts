@@ -4,10 +4,11 @@ import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } fr
 import { PATH_METADATA } from '@nestjs/common/constants';
 import { Reflector } from '@nestjs/core';
 import { transformException } from '@nestjs/platform-express/multer/multer/multer.utils';
-import { createHash } from 'crypto';
+import { Hash, createHash } from 'crypto';
 import { NextFunction, RequestHandler } from 'express';
 import multer, { StorageEngine, diskStorage } from 'multer';
 import { Observable } from 'rxjs';
+import { PassThrough, Readable, Writable } from 'stream';
 import { AuthRequest } from './app.guard';
 
 export enum Route {
@@ -132,6 +133,11 @@ export class FileUploadInterceptor implements NestInterceptor {
     }
 
     const hash = createHash('sha1');
+    /* Pausing the stream here so that it doesn't emit `data` events until the
+       handler in defaultStorage._handleFile() initialises. If the stream isn't
+       paused before _handleFile() and backend of _handleFile() has startup latency
+       the chunks will be consumed by the hash function without reaching the storage. */
+    file.stream.pause();
     file.stream.on('data', (chunk) => hash.update(chunk));
     this.defaultStorage._handleFile(req, file, (error, info) => {
       if (error) {

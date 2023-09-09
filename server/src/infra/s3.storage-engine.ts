@@ -57,14 +57,16 @@ export class S3StorageEngine implements StorageEngine {
         }
 
         const path = `${destination}/${filename}`;
-
         this.client
           .putObject(this.bucket, path, file.stream)
           .then(() => {
-            callback(null, {
+            console.log('putObject.then', file, file.stream);
+            const info: Partial<Express.Multer.File> = {
               filename: filename,
               destination: destination,
-            });
+              path: path,
+            };
+            callback(null, info);
           })
           .catch((error) => callback(error));
       });
@@ -72,6 +74,7 @@ export class S3StorageEngine implements StorageEngine {
   }
 
   _removeFile(req: AuthRequest, file: Express.Multer.File, callback: (error: Error | null) => void): void {
+    console.log('_removeFIle');
     this.client
       .removeObjects(this.bucket, [file.filename])
       .then(() => callback(null))
