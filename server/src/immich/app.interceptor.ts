@@ -5,7 +5,6 @@ import { Reflector } from '@nestjs/core';
 import { transformException } from '@nestjs/platform-express/multer/multer/multer.utils';
 import { createHash } from 'crypto';
 import { NextFunction, RequestHandler } from 'express';
-import { result } from 'lodash';
 import multer, { StorageEngine, diskStorage } from 'multer';
 import { Observable } from 'rxjs';
 import { AuthRequest } from './app.guard';
