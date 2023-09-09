@@ -30,6 +30,7 @@ export class S3Provider implements IStorageRepository {
    * TODO: Update web to hide disk usage when S3 is enabled.
    */
   async checkDiskUsage(folder: string): Promise<DiskUsage> {
+    console.log(this.checkDiskUsage.name, folder);
     return Promise.resolve({
       available: 1099511627776,
       free: 1099511627776,
@@ -38,6 +39,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   async checkFileExists(filepath: string, mode?: number): Promise<boolean> {
+    console.log(this.checkFileExists.name, filepath, mode);
     return new Promise<boolean>((resolve, reject) => {
       this.client
         .statObject(this.bucket, filepath)
@@ -47,6 +49,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   async createReadStream(filepath: string, mimeType?: string | null): Promise<ImmichReadStream> {
+    console.log(this.createReadStream.name, filepath, mimeType);
     const stat = await this.client.statObject(this.bucket, filepath);
     return new Promise<ImmichReadStream>((resolve, reject) => {
       this.client
@@ -63,6 +66,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   async createZipStream(): Promise<ImmichZipStream> {
+    console.log(this.createZipStream.name);
     const archive = archiver('zip', { store: true });
     const promises: Promise<void>[] = [];
 
@@ -89,11 +93,13 @@ export class S3Provider implements IStorageRepository {
   }
 
   async mkdir(filepath: string): Promise<void> {
+    console.log(this.mkdir.name, filepath);
     const objectName = filepath.endsWith('/') ? filepath : `${filepath}/`;
     await this.client.putObject(this.bucket, objectName, '', 0);
   }
 
   async moveFile(source: string, target: string): Promise<void> {
+    console.log(this.moveFile.name, source, target);
     // bucket prefix is required for the source
     const prefixedSource = `${this.bucket}/${source}`;
 
@@ -114,6 +120,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   async readdir(folder: string): Promise<string[]> {
+    console.log(this.readdir.name, folder);
     const prefix = folder.endsWith('/') ? folder : `${folder}/`;
     const prefixLength = prefix.length;
     return new Promise<string[]>((resolve, reject) => {
@@ -140,6 +147,7 @@ export class S3Provider implements IStorageRepository {
   }
 
   async removeEmptyDirs(folder: string): Promise<void> {
+    console.log(this.removeEmptyDirs.name, folder);
     const directory = folder.endsWith('/') ? folder.substring(-1) : folder;
     return this._removeEmptyDirsRecursive(directory, true);
   }
@@ -159,10 +167,12 @@ export class S3Provider implements IStorageRepository {
   }
 
   async unlink(filepath: string): Promise<void> {
+    console.log(this.unlink.name, filepath);
     return this.client.removeObjects(this.bucket, [filepath]);
   }
 
   async unlinkDir(folder: string, options?: { recursive?: boolean; force?: boolean }): Promise<void> {
+    console.log(this.unlinkDir.name, folder, options);
     const prefix = folder.endsWith('/') ? folder : `${folder}/`;
     return new Promise<void>((resolve, reject) => {
       const data: string[] = [];

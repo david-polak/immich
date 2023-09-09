@@ -4,11 +4,10 @@ import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } fr
 import { PATH_METADATA } from '@nestjs/common/constants';
 import { Reflector } from '@nestjs/core';
 import { transformException } from '@nestjs/platform-express/multer/multer/multer.utils';
-import { Hash, createHash } from 'crypto';
+import { createHash } from 'crypto';
 import { NextFunction, RequestHandler } from 'express';
 import multer, { StorageEngine, diskStorage } from 'multer';
 import { Observable } from 'rxjs';
-import { PassThrough, Readable, Writable } from 'stream';
 import { AuthRequest } from './app.guard';
 
 export enum Route {
